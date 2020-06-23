@@ -7,19 +7,21 @@ STOP_WORDS = [
 
 class FileReader:
     def __init__(self, filename):
-        pass
+        self.filename = filename.open()
 
     def read_contents(self):
         """
         This should read all the contents of the file
         and return them as one string.
         """
-        raise NotImplementedError("FileReader.read_contents")
+        contents = self.filename.read()
+        return contents
 
 
 class WordList:
     def __init__(self, text):
-        pass
+        self.text = text
+        self.words = []
 
     def extract_words(self):
         """
@@ -27,14 +29,22 @@ class WordList:
         is responsible for lowercasing all words and stripping
         them of punctuation.
         """
-        raise NotImplementedError("WordList.extract_words")
+        import string
+
+        self.words = self.text.lower().split()
+        self.words = [word.strip(string.punctuation) for word in self.words]
+        # print(self.words)
 
     def remove_stop_words(self):
         """
         Removes all stop words from our word list. Expected to
         be run after extract_words.
         """
-        raise NotImplementedError("WordList.remove_stop_words")
+        self.words = [
+            word
+            for word in self.words
+            if not word in STOP_WORDS
+        ]
 
     def get_freqs(self):
         """
@@ -43,12 +53,17 @@ class WordList:
         extract_words and remove_stop_words. The data structure
         could be a dictionary or another type of object.
         """
-        raise NotImplementedError("WordList.get_freqs")
+        freqs = {
+            word: self.words.count(word)
+            for word in self.words
+        }
+        alpha_freqs = dict(sorted(freqs.items()))
+        return dict(sorted(alpha_freqs.items(), key=lambda seq: seq[1], reverse=True))
 
 
 class FreqPrinter:
     def __init__(self, freqs):
-        pass
+        self.freqs = freqs
 
     def print_freqs(self):
         """
@@ -67,7 +82,17 @@ class FreqPrinter:
        rights | 6    ******
         right | 6    ******
         """
-        raise NotImplementedError("FreqPrinter.print_freqs")
+        top_ten = []
+        top_ten_words = []
+        i = 0
+        for item in self.freqs.items():
+            if i < 10:
+                top_ten.append(item)
+                top_ten_words.append(item[0])
+                i += 1
+        longest_word = max(top_ten_words, key=len)
+        for item in top_ten:
+            print(f"{item[0].rjust(len(longest_word) + 2)} | {str(item[1]).ljust(3)}{item[1] * '*'}")
 
 
 if __name__ == "__main__":
